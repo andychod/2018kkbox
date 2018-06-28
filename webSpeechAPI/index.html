@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Voice Controlled Notes App</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <link rel="stylesheet" href="shoelace.css">
+        <link rel="stylesheet" href="styles.css">
+
+    </head>
+    <body>
+        <div class="container">
+
+            <h1>生活中的話語與音樂的連結</h1>
+            <h3 class="no-browser-support">Sorry, 你的瀏覽器不支援我們的api，請用Chrom來開啟</h3>
+
+            <div class="app"> 
+                <div class="input-single">
+                    <textarea id="note-textarea" placeholder="Create a new note by typing or using voice recognition." rows="6"></textarea>
+                </div>         
+                <button id="start-record-btn" title="Start Recording">Start</button>
+                <button id="pause-record-btn" title="Pause Recording">Pause</button>  
+                <p id="recording-instructions">按下 <strong>Start</strong>開始偵測</p
+
+            </div>
+
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="app.js"></script>
+
+    </body>
+</html>
+
+

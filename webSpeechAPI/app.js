@@ -43,6 +43,7 @@ recognition.onresult = function(event) {
   if(!mobileRepeatBug) {
     noteContent = transcript;
     noteTextarea.val(noteContent);
+    doNextStep(transcript);
   }
 };
 
@@ -87,3 +88,9 @@ $('#pause-record-btn').on('click', function(e) {
 noteTextarea.on('input', function() {
   noteContent = $(this).val();
 })
+
+function doNextStep(transcript)
+{
+  //... transcript即為翻譯結果
+  console.log("[轉換結果]: " + transcript);
+}

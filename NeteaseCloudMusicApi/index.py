@@ -22,7 +22,7 @@ def GetLyric(songId, jsondata):
                 substr = mylyric[r+1:]
                 if(substr[0]!=' ' and substr.find('：')== -1):
                     jsondata.append(substr)
-                    print(substr)
+                    #print(substr)
         # 存檔起來
         with open(songname + '.json', 'w', encoding="utf8") as outfile:
             json.dump(jsondata, outfile, ensure_ascii=False,indent=4,)

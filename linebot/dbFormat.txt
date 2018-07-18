@@ -1,0 +1,16 @@
+預計使用關聯是資料庫
+需要的欄位有6項：ID、SongName、Lyrics、youtubeURL、Singer、Band
+
+*欄位說明
+1.ID
+    為primary key，type為數字
+2.SongName
+    存入歌名，type為String
+3.Lyrics
+    存入完整的原始歌詞，type為String
+4.youtubeURL
+    存入此歌在youtube的連結
+5.Singer
+    存入歌手名，type為string
+6.Band
+    存入樂團名，type為String。若無樂團，此欄位填NULL

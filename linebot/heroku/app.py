@@ -20,7 +20,6 @@ chatbot = ChatBot(
     read_only=True,
 )
 
-
 def getSinger(msg):
     # doing something
     return "[某某歌手]"
@@ -105,6 +104,7 @@ def handle_message(event):
     '''ss = chatbot.get_response(event.message.text)
     message = TextSendMessage(text= ss.text)
     line_bot_api.reply_message(event.reply_token, message)'''
+
 
 import os
 if __name__ == "__main__":

@@ -11,22 +11,28 @@ from linebot.models import *
 from chatterbot import ChatBot
 from hanziconv import HanziConv
 from random import randint
+import MySQLdb
 
 
 chatbot = ChatBot(
     "Andy",
     storage_adapter='chatterbot.storage.SQLStorageAdapter',
-    database='./database.sqlite3',
+    database='./TempBrain.sqlite3',
     read_only=True,
 )
 
+
 def getSinger(msg):
-    # doing something
-    return "[某某歌手]"
+    queryy = "SELECT `Artists` FROM `LyricsData` WHERE `Lyrics` like '%"+msg+"%'"
+    cursor.execute(queryy)
+    record = cursor.fetchone()
+    return str(record[0])
 
 def getSongCount(msg):
-    # doing something
-    return "[n]"
+    queryy = "SELECT `SongName` FROM `LyricsData` WHERE `Lyrics` like '%"+msg+"%'"
+    cursor.execute(queryy)
+    record = cursor.fetchone()
+    return str(len(record[0]))
 
 def isNegation(msg):
     if(msg.find("不是喔")!=-1 or msg.find("不是喔")!=-1 or msg.find("猜錯了")!=-1  or msg.find("並沒有")!=-1 or msg.find("沒有喔")!=-1):
@@ -69,6 +75,11 @@ def handle_message(event):
     print("num = " + str(num))
     msg = event.message.text
 
+    '''cursor.execute("SELECT `SongName` FROM `LyricsData` WHERE `Lyrics` like '%安穩睡在我胸懷%'")
+
+    record = cursor.fetchone()'''
+
+
     if(msg.find("給我歌曲")!=-1):
         print("Bot: ~~給歌曲url~~")
         line_bot_api.reply_message(event.reply_token,
@@ -105,8 +116,10 @@ def handle_message(event):
     message = TextSendMessage(text= ss.text)
     line_bot_api.reply_message(event.reply_token, message)'''
 
-
 import os
 if __name__ == "__main__":
+    db = MySQLdb.connect(host="140.138.77.90",
+        user="visteam", passwd="RR10706b", db="kkbox2018",charset='utf8')
+    cursor = db.cursor()
     port = int(os.environ.get('PORT', 5000))
 app.run(host='0.0.0.0', port=port)

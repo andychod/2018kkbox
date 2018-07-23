@@ -12,6 +12,8 @@ from chatterbot import ChatBot
 from hanziconv import HanziConv
 from random import randint
 import MySQLdb
+import requests
+import json
 
 
 chatbot = ChatBot(
@@ -33,6 +35,50 @@ def getSongCount(msg):
     cursor.execute(queryy)
     record = cursor.fetchone()
     return str(len(record[0]))
+
+def getSongURL():
+    # sort songIDList
+    global songIDList
+    songIDList = sorted(songIDList, key=lambda s: s['times'], reverse=True)
+    size = len(songIDList)
+    urlList = []
+    if(size < 3):
+        for dd in songIDList:
+            r = requests.get('http://140.138.77.90:3005/youtubeLink/' + dd['ID'])
+            rData = json.loads(r.text)
+            urlList.append(rData["youtubeLink"])
+    else:
+        for i in range(3):
+            r = requests.get('http://140.138.77.90:3005/youtubeLink/' + songIDList[i]['ID'])
+            rData = json.loads(r.text)
+            urlList.append(rData["youtubeLink"])
+    return urlList
+
+def getSongID_andSave(msg):
+    queryy = "SELECT `kkboxID` FROM `LyricsData` WHERE `Lyrics` like '%"+msg+"%'"
+    cursor.execute(queryy)
+    record = cursor.fetchone()
+    kkboxID = record[0]
+    if(len(songIDList) == 0):
+        insideData = {
+            'ID':kkboxID,
+            'times':1
+        }
+        songIDList.append(insideData)
+    else:
+        dd = [data for data in songIDList if data.get('ID')==kkboxID]
+        if(len(dd) == 0): #如果不存在
+            insideData = {
+                'ID':kkboxID,
+                'times':1
+            }
+            songIDList.append(insideData)
+        else:
+            for i in range(len(songIDList)):
+                if(songIDList[i]['ID'] == kkboxID):
+                    songIDList[i]['times'] = songIDList[i]['times'] + 1
+                    break
+    return kkboxID
 
 def isNegation(msg):
     if(msg.find("不是喔")!=-1 or msg.find("不是喔")!=-1 or msg.find("猜錯了")!=-1  or msg.find("並沒有")!=-1 or msg.find("沒有喔")!=-1):
@@ -75,21 +121,32 @@ def handle_message(event):
     print("num = " + str(num))
     msg = event.message.text
 
-    '''cursor.execute("SELECT `SongName` FROM `LyricsData` WHERE `Lyrics` like '%安穩睡在我胸懷%'")
-
-    record = cursor.fetchone()'''
-
-
     if(msg.find("給我歌曲")!=-1):
+        tempUrlList = getSongURL()
+        msg = ""
+        for dd in tempUrlList:
+            msg = msg + '\n\n' + dd
+        line_bot_api.reply_message(event.reply_token,
+            TextSendMessage(text= str(msg)))
+    elif(msg.find("我要重玩")!=-1):
+        songIDList.clear()
+        line_bot_api.reply_message(event.reply_token,
+            TextSendMessage(text= "沒問題!!\n\n猜歌遊戲，開始"))
+    else:
+        lys = chatbot.get_response(msg).text
+        response = lys
+        getSongID_andSave(lys)
+        line_bot_api.reply_message(event.reply_token,
+                TextSendMessage(text= response))
+
+    '''if(msg.find("給我歌曲")!=-1):
         print("Bot: ~~給歌曲url~~")
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text= "~~給歌曲url~~"))
     elif(isNegation(msg)==1):
-        print("Bot: ㄎㄎ，再給我一些提示吧")
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text= "ㄎㄎ，再給我一些提示吧"))
     elif(isPositive(msg)==1):
-        print("Bot: 哈哈，我們繼續~~")
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text= "哈哈，我們繼續~~"))
     elif(num % 4 == 0 ):
@@ -110,7 +167,7 @@ def handle_message(event):
         response = "是不是有這句阿:「" + chatbot.get_response(msg).text + "」"
         print("Bot:  是不是有這句阿:「" + response+"」")
         line_bot_api.reply_message(event.reply_token,
-            TextSendMessage(text= response))
+            TextSendMessage(text= response))'''
 
     '''ss = chatbot.get_response(event.message.text)
     message = TextSendMessage(text= ss.text)
@@ -121,5 +178,8 @@ if __name__ == "__main__":
     db = MySQLdb.connect(host="140.138.77.90",
         user="visteam", passwd="RR10706b", db="kkbox2018",charset='utf8')
     cursor = db.cursor()
+
+    # 存入歌曲的kkboxID
+    songIDList = []
     port = int(os.environ.get('PORT', 5000))
 app.run(host='0.0.0.0', port=port)

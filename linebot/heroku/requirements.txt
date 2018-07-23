@@ -3,3 +3,4 @@ flask
 chatterbot
 hanziconv
 mysqlclient
+requests

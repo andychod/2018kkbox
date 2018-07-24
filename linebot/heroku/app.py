@@ -19,7 +19,7 @@ import json
 chatbot = ChatBot(
     "Andy",
     storage_adapter='chatterbot.storage.SQLStorageAdapter',
-    database='./TempBrain.sqlite3',
+    database='./Brain.sqlite3',
     read_only=True,
 )
 
@@ -44,6 +44,7 @@ def getSongURL():
     urlList = []
     if(size < 3):
         for dd in songIDList:
+            print("ID = " + str(dd['ID']))
             r = requests.get('http://140.138.77.90:3005/youtubeLink/' + dd['ID'])
             rData = json.loads(r.text)
             urlList.append(rData["youtubeLink"])
@@ -56,6 +57,7 @@ def getSongURL():
 
 def getSongID_andSave(msg):
     queryy = "SELECT `kkboxID` FROM `LyricsData` WHERE `Lyrics` like '%"+msg+"%'"
+    print("queryy = " + queryy)
     cursor.execute(queryy)
     record = cursor.fetchone()
     kkboxID = record[0]
@@ -81,7 +83,7 @@ def getSongID_andSave(msg):
     return kkboxID
 
 def isNegation(msg):
-    if(msg.find("不是喔")!=-1 or msg.find("不是喔")!=-1 or msg.find("猜錯了")!=-1  or msg.find("並沒有")!=-1 or msg.find("沒有喔")!=-1):
+    if(msg.find("不是喔")!=-1 or msg.find("不對ㄟ")!=-1 or msg.find("猜錯了")!=-1  or msg.find("並沒有")!=-1 or msg.find("沒有喔")!=-1):
         return 1
     else:
         return 0
@@ -121,7 +123,16 @@ def handle_message(event):
     print("num = " + str(num))
     msg = event.message.text
 
-    if(msg.find("給我歌曲")!=-1):
+    lys = chatbot.get_response(msg).text
+    print("Log : seccessful~~~~")
+    line_bot_api.reply_message(event.reply_token,
+                TextSendMessage(text= lys))
+
+    '''if(msg == "哈囉"):
+        msg = "猜歌詞遊戲開始！！你可以任意地與機器人對話\n>>當想要bot給出歌曲時，請說「給我歌曲吧」\n>>若想重玩，請說「我要重玩」"
+        line_bot_api.reply_message(event.reply_token,
+            TextSendMessage(text= str(msg)))
+    elif(msg.find("給我歌曲")!=-1):
         tempUrlList = getSongURL()
         msg = ""
         for dd in tempUrlList:
@@ -132,37 +143,44 @@ def handle_message(event):
         songIDList.clear()
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text= "沒問題!!\n\n猜歌遊戲，開始"))
-    else:
-        lys = chatbot.get_response(msg).text
-        response = lys
-        getSongID_andSave(lys)
-        line_bot_api.reply_message(event.reply_token,
-                TextSendMessage(text= response))
-
-    '''if(msg.find("給我歌曲")!=-1):
-        print("Bot: ~~給歌曲url~~")
-        line_bot_api.reply_message(event.reply_token,
-            TextSendMessage(text= "~~給歌曲url~~"))
     elif(isNegation(msg)==1):
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text= "ㄎㄎ，再給我一些提示吧"))
     elif(isPositive(msg)==1):
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text= "哈哈，我們繼續~~"))
-    elif(num % 4 == 0 ):
-        print("Bot: 恩恩，再給我一些提示")
+    elif(num % 6 == 0 ):
+        lys = chatbot.get_response(msg).text
+        lys = (lys.split(" "))[0]
+        getSongID_andSave(lys)
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text= "恩恩，再給我一些提示"))
-    elif(num % 4 == 1):
+    elif(num % 6 == 1):
         lys = chatbot.get_response(msg).text
-        print("Bot: 你喜歡"+getSinger(lys)+"齁")
+        lys = (lys.split(" "))[0]
+        getSongID_andSave(lys)
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text= "你喜歡"+getSinger(lys)+"齁"))
-    elif(num % 4 == 2):
+    elif(num % 6 == 2):
         lys = chatbot.get_response(msg).text
-        print("Bot: 我猜，這首歌好像是"+getSongCount(lys)+"個字喔~~")
+        lys = (lys.split(" "))[0]
+        getSongID_andSave(lys)
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text= "我猜，這首歌好像是"+getSongCount(lys)+"個字喔~~"))
+    else:
+        lys = chatbot.get_response(msg).text
+        lys = (lys.split(" "))[0]
+        response = lys
+        getSongID_andSave(lys)
+        line_bot_api.reply_message(event.reply_token,
+                TextSendMessage(text= response))'''
+
+    '''if(msg.find("給我歌曲")!=-1):
+        print("Bot: ~~給歌曲url~~")
+        line_bot_api.reply_message(event.reply_token,
+            TextSendMessage(text= "~~給歌曲url~~"))
+
+
     else:
         response = "是不是有這句阿:「" + chatbot.get_response(msg).text + "」"
         print("Bot:  是不是有這句阿:「" + response+"」")
